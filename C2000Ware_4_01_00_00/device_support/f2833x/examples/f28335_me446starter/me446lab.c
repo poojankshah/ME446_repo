@@ -90,6 +90,10 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
 }
 
 void printing(void){
-    serial_printf(&SerialA, "%.2f %.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI);
+    if (whattoprint == 0) {
+        serial_printf(&SerialA, "%.2f %.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI);
+    } else {
+        serial_printf(&SerialA, "Print test   \n\r");
+    }
 }
 
