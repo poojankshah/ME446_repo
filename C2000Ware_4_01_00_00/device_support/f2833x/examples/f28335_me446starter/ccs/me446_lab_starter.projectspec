@@ -20,7 +20,7 @@
     <file action="copy" path="../../../common/source/DSP2833x_Spi.c" targetDirectory="" />
     <file action="copy" path="../../../common/source/DSP2833x_SysCtrl.c" targetDirectory="" />
     <file action="copy" path="../../../common/source/DSP2833x_usDelay.asm" targetDirectory="" />
-    <file action="copy" path="../../../common/targetConfigs/TMS320F28335.ccxml" targetDirectory="targetConfigs" />
+    <file action="copy" path="../ccs/targetConfigs/TMS320F28335.ccxml" targetDirectory="targetConfigs" />
 
     <file action="copy" path="../../../headers/cmd/DSP2833x_Headers_nonBIOS.cmd" targetDirectory="" />    
     <file action="copy" path="../../../headers/source/DSP2833x_GlobalVariableDefs.c" targetDirectory="" />
