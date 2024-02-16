@@ -52,6 +52,12 @@ float theta1_motor_calc = 0;
 float theta2_motor_calc = 0;
 float theta3_motor_calc = 0;
 
+//pks11 Implmenting the IIR filter
+float Theta1_old = 0;
+float Omega1_old1 = 0;
+float Omega1_old2 = 0;
+float Omega1 = 0;
+
 
 float L = 0.254; //pks11 // Link parameter in meters
 
@@ -62,7 +68,7 @@ void mains_code(void);
 //
 void main(void)
 {
-	mains_code();
+    mains_code();
 }
 
 
@@ -106,6 +112,33 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //pks11 adding a variable
     theta3 = theta3motor;
 
+    //pks11 Implmenting the theta dot filters
+    //theta1dot :: Omega1
+    Omega1 = (theta1motor - Theta1_old)/0.001;
+    Omega1 = (Omega1 + Omega1_old1 + Omega1_old2)/3.0;
+    Theta1_old = theta1motor;
+    //order matters here. Why??
+    Omega1_old2 = Omega1_old1;
+    Omega1_old1 = Omega1;
+
+    //theta2dot : Omega2
+    Omega2 = (theta2motor - Theta2_old)/0.001;
+    Omega2 = (Omega2 + Omega2_old1 + Omega2_old2)/3.0;
+    Theta2_old = theta2motor;
+    //order matters here. Why??
+    Omega2_old2 = Omega2_old1;
+    Omega2_old1 = Omega2;
+
+    //theta2dot : Omega2
+    Omega3 = (theta3motor - Theta3_old)/0.001;
+    Omega3 = (Omega3 + Omega3_old1 + Omega3_old2)/3.0;
+    Theta3_old = theta3motor;
+    //order matters here. Why??
+    Omega3_old2 = Omega3_old1;
+    Omega3_old1 = Omega3;
+
+
+
     //pks11 adding a calculation of h03 with motor angles
     //Steps Folllowed : Calculated forward kinemtics from the DH table and provide the coordinates of endeffector which is [0;0;0] in frame 3
     // Measured the relationship between theta angles and joint motors angles.
@@ -118,7 +151,7 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //pks11_ calculating thetas from inverese kinematics from the geomteric approach
     theta1_calc = atan(y_endeffector/x_endeffector);
     theta3_calc = acos((pow((L- z_endeffector),2) + pow(x_endeffector,2) + pow(y_endeffector,2) - 2*pow(L,2))/(2*pow(L,2)));
-//  theta2_calc = acos(sqrt((pow(x_endeffector,2) + pow(y_endeffector,2))/((pow(x_endeffector,2) + pow(y_endeffector,2) + pow((L- z_endeffector),2))))) - (theta3_calc/2);
+    //  theta2_calc = acos(sqrt((pow(x_endeffector,2) + pow(y_endeffector,2))/((pow(x_endeffector,2) + pow(y_endeffector,2) + pow((L- z_endeffector),2))))) - (theta3_calc/2);
     theta2_calc = atan2((L-z_endeffector),sqrt((pow(x_endeffector,2) + pow(y_endeffector,2)))) - (theta3_calc/2);
 
     // Measured the relationship between theta angles and joint motors angles.
@@ -139,7 +172,7 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
 void printing(void){
     if (whattoprint == 0) {
         //serial_printf(&SerialA, "%.2f %.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI);
-//  serial_printf(&SerialA, "%.2f %.2f,%.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI,theta3); //printing theta3 in radians as well! pks11
+        //  serial_printf(&SerialA, "%.2f %.2f,%.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI,theta3); //printing theta3 in radians as well! pks11
         serial_printf(&SerialA, "theamotor : %.2f,%.2f,%.2f \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI); // pks11// this is motors angle measured
         serial_printf(&SerialA, "position : %.2f,%.2f,%.2f \n\r",x_endeffector,y_endeffector,z_endeffector); //pks11 // position calculated from the forward Kinematics // D-H Table
         serial_printf(&SerialA, "thetaDHcalc : %.2f, %.2f, %.2f \n\r",theta1_calc*180/PI,theta2_calc*180/PI,theta3_calc*180/PI); // pks11 // DH theta calculated from the geometric approach of the inverese kinematics

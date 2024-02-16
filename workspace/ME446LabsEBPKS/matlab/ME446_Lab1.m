@@ -31,6 +31,8 @@ h23 = [[cos(theta3) -sin(theta3) 0 0.254*cos(theta3)];
 
 h03 = h01*h12*h23;
 
+vpa(simplify(h03));
+
 syms theta1m theta2m theta3m;
 theta1 = theta1m;
 theta2 = theta2m - sym(pi)/2;
