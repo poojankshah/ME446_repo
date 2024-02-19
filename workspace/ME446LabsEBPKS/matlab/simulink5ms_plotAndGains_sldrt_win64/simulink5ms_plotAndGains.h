@@ -6,9 +6,9 @@
  *
  * Code generation for model "simulink5ms_plotAndGains".
  *
- * Model version              : 11.0
+ * Model version              : 11.1
  * Simulink Coder version : 9.9 (R2023a) 19-Nov-2022
- * C source code generated on : Fri Jan 26 11:34:05 2024
+ * C source code generated on : Mon Feb 19 17:27:14 2024
  *
  * Target selection: sldrt.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
@@ -858,12 +858,12 @@
 /* Block signals (default storage) */
 typedef struct {
   real_T Gain1;                        /* '<Root>/Gain1' */
-  real_T plot1;                        /* '<Root>/plot1' */
+  real_T theta1motor;                  /* '<Root>/plot1' */
   real_T Gain2;                        /* '<Root>/Gain2' */
-  real_T plot2;                        /* '<Root>/plot2' */
+  real_T theta2motor;                  /* '<Root>/plot2' */
   real_T Gain3;                        /* '<Root>/Gain3' */
-  real_T plot3;                        /* '<Root>/plot3' */
-  real_T plot4;                        /* '<Root>/plot4' */
+  real_T theta3motor;                  /* '<Root>/plot3' */
+  real_T theta3_desired;               /* '<Root>/plot4' */
   int32_T PacketInput1_o1[4];          /* '<S1>/Packet Input1' */
   int32_T PacketInput1_o2;             /* '<S1>/Packet Input1' */
   int16_T Gain1_i;                     /* '<S2>/Gain1' */
@@ -967,7 +967,7 @@ struct P_simulink5ms_plotAndGains_T_ {
   real_T plot4_Gain;                   /* Expression: 1
                                         * Referenced by: '<Root>/plot4'
                                         */
-  real_T Value_16bit2_Value;           /* Expression: 16
+  real_T Value_16bit2_Value;           /* Expression: 1
                                         * Referenced by: '<Root>/Value_16bit2'
                                         */
   real_T Gain6_Gain;                   /* Expression: 1
@@ -985,7 +985,7 @@ struct P_simulink5ms_plotAndGains_T_ {
   real_T Gain2_Gain_h;                 /* Expression: 1
                                         * Referenced by: '<S2>/Gain2'
                                         */
-  real_T Value_16bit1_Value;           /* Expression: 19
+  real_T Value_16bit1_Value;           /* Expression: 1
                                         * Referenced by: '<Root>/Value_16bit1'
                                         */
   real_T Gain5_Gain;                   /* Expression: 1

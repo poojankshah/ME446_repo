@@ -58,8 +58,30 @@ float Omega1_old1 = 0;
 float Omega1_old2 = 0;
 float Omega1 = 0;
 
+float Theta2_old = 0;
+float Omega2_old1 = 0;
+float Omega2_old2 = 0;
+float Omega2 = 0;
+
+float Theta3_old = 0;
+float Omega3_old1 = 0;
+float Omega3_old2 = 0;
+float Omega3 = 0;
+
+//theta2_desired and theta3_desired
+float theta1_desired = 0;
+float theta2_desired = 0;
+float theta3_desired = 0;
 
 float L = 0.254; //pks11 // Link parameter in meters
+
+float Kp1 = 50; // new value
+float Kp2 = 50;//New value from 12.5 to 50
+float Kp3 = 75;//new value from 12.5 to 75
+
+float Kd1 = 2; //new value
+float Kd2 = 2; // New value from 1 to 2
+float Kd3 = 2; //New value from 1 to 2
 
 void mains_code(void);
 
@@ -105,13 +127,25 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
         GpioDataRegs.GPBTOGGLE.bit.GPIO60 = 1; // Blink LED on Emergency Stop Box
     }
 
+    //pks11 defining the input
+    if ((mycount%1000)== 0) {
+        theta1_desired = PI/6;
+        theta2_desired = PI/6;
+        theta3_desired = PI/6;
+        if((mycount%2000) == 0){
+            theta1_desired = 0;
+            theta2_desired = 0;
+            theta3_desired = 0;
+        }
+    }
+
     printtheta1motor = theta1motor;
     printtheta2motor = theta2motor;
     printtheta3motor = theta3motor;
 
     //pks11 adding a variable
     theta3 = theta3motor;
-
+    ////
     //pks11 Implmenting the theta dot filters
     //theta1dot :: Omega1
     Omega1 = (theta1motor - Theta1_old)/0.001;
@@ -136,6 +170,43 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //order matters here. Why??
     Omega3_old2 = Omega3_old1;
     Omega3_old1 = Omega3;
+    ////
+    //pks11 calculating the taus
+    *tau1 = Kp1*(theta1_desired - theta1motor) - Kd1*(Omega1);
+    *tau2 = Kp2*(theta2_desired - theta2motor) - Kd2*(Omega2);
+    *tau3 = Kp3*(theta3_desired - theta3motor) - Kd3*(Omega3);
+
+    //Saturation block
+    if(*tau1 < -5)
+    {
+        *tau1 = -5;
+    }
+
+    if(*tau1 > 5)
+    {
+        *tau1 = 5;
+    }
+
+    if(*tau2 < -5)
+    {
+        *tau2 = -5;
+    }
+
+    if(*tau2 > 5)
+    {
+        *tau2 = 5;
+    }
+
+    if(*tau3 < -5)
+    {
+        *tau3 = -5;
+    }
+
+    if(*tau3 > 5)
+    {
+        *tau3 = 5;
+    }
+
 
 
 
@@ -160,11 +231,12 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     theta1_motor_calc = theta1_calc;
     theta2_motor_calc = theta2_calc + PI/2;
     theta3_motor_calc = theta3_calc + theta2motor - PI/2;
-
+    //pks11 - sending reference signals and motor angles
     Simulink_PlotVar1 = theta1motor;
     Simulink_PlotVar2 = theta2motor;
     Simulink_PlotVar3 = theta3motor;
-    Simulink_PlotVar4 = 0;
+    Simulink_PlotVar4 = theta3_desired;
+
 
     mycount++;
 }
