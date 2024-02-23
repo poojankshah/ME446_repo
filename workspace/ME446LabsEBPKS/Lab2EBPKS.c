@@ -73,8 +73,28 @@ float theta1_desired = 0;
 float theta2_desired = 0;
 float theta3_desired = 0;
 
-float L = 0.254; //pks11 // Link parameter in meters
+//tracking error
+float e_theta1 = 0;
+float e_theta2 = 0;
+float e_theta3 = 0;
 
+//integral
+
+float Ik_theta1_1 = 0;
+float Ik_theta1 = 0;
+float Ik_theta2_1 = 0;
+float Ik_theta2 = 0;
+float Ik_theta3_1 = 0;
+float Ik_theta3 = 0;
+
+//error
+float e_theta1_1 = 0;
+float e_theta2_1 = 0;
+float e_theta3_1 = 0;
+
+
+float L = 0.254; //pks11 // Link parameter in meters
+//Pd controller gains
 float Kp1 = 50; // new value
 float Kp2 = 50;//New value from 12.5 to 50
 float Kp3 = 75;//new value from 12.5 to 75
@@ -82,6 +102,29 @@ float Kp3 = 75;//new value from 12.5 to 75
 float Kd1 = 2; //new value
 float Kd2 = 2; // New value from 1 to 2
 float Kd3 = 2; //New value from 1 to 2
+
+//PID controller
+float Kp1_PD = 50;
+float Kp2_PD = 50;
+float Kp3_PD = 75;
+
+float Kd1_PD = 2;
+float Kd2_PD = 2;
+float Kd3_PD = 2;
+
+float Kp1_PID = 40;
+float Kp2_PID = 200; //old 40
+float Kp3_PID = 150; // old 50
+
+float Kd1_PID = 2;
+float Kd2_PID = 7; // old 2
+float Kd3_PID = 7;
+
+float Ki1_PID = 10; // old 5
+float Ki2_PID = 75; // old 5
+float Ki3_PID = 75; // old 7.5
+
+
 
 void mains_code(void);
 
@@ -170,41 +213,101 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //order matters here. Why??
     Omega3_old2 = Omega3_old1;
     Omega3_old1 = Omega3;
-    ////
-    //pks11 calculating the taus
-    *tau1 = Kp1*(theta1_desired - theta1motor) - Kd1*(Omega1);
-    *tau2 = Kp2*(theta2_desired - theta2motor) - Kd2*(Omega2);
-    *tau3 = Kp3*(theta3_desired - theta3motor) - Kd3*(Omega3);
+
+    /// pks11 Tracking errors calculation
+    //trackingerror_theta1
+
+    e_theta1 = theta1_desired - theta1motor;
+
+    //trackingerror_theta2
+    e_theta2 = theta2_desired - theta2motor;
+
+    //trackingerror_theta3
+    e_theta3 = theta3_desired - theta3motor;
+
+    //pid controller Adaptive gains!
+    if(fabs(e_theta1) < 0.08)
+    {
+
+        *tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);
+        Ik_theta1 = Ik_theta1_1 + (e_theta1 + e_theta1_1)*0.001;
+    }
+    else
+    {
+        Ik_theta1 = 0;
+        *tau1 = Kp1_PD*(theta1_desired - theta1motor) - Kd1_PD*(Omega1);
+    }
+
+    //theta2 control
+    if(fabs(e_theta2) < 0.08)
+    {
+
+        *tau2 = Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 - Kd2_PID*(Omega2);
+        Ik_theta2 = Ik_theta2_1 + (e_theta2 + e_theta2_1)*0.001;
+    }
+    else
+    {
+        Ik_theta2 = 0;
+        *tau2 = Kp2_PD*(theta2_desired - theta2motor) - Kd2_PD*(Omega2);
+    }
+
+    //theta3 control
+    if(fabs(e_theta3) < 0.08)
+    {
+        *tau3 = Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 - Kd3_PID*(Omega3);
+        Ik_theta3 = Ik_theta3_1 + (e_theta3 + e_theta3_1)*0.001;
+    }
+
+    else
+    {
+        Ik_theta3 = 0;
+        *tau3 = Kp3_PD*(theta3_desired - theta3motor) - Kd3_PD*(Omega3);
+    }
+
+
+    //// PD
+    //pks11 calculating the taus // pd controller
+//    *tau1 = Kp1*(theta1_desired - theta1motor) - Kd1*(Omega1);
+//    *tau2 = Kp2*(theta2_desired - theta2motor) - Kd2*(Omega2);
+//    *tau3 = Kp3*(theta3_desired - theta3motor) - Kd3*(Omega3);
+
 
     //Saturation block
     if(*tau1 < -5)
     {
         *tau1 = -5;
+        Ik_theta1 = Ik_theta1_1;
     }
 
     if(*tau1 > 5)
     {
         *tau1 = 5;
+        Ik_theta1 = Ik_theta1_1;
     }
 
     if(*tau2 < -5)
     {
         *tau2 = -5;
+        Ik_theta2 = Ik_theta2_1;
+
     }
 
     if(*tau2 > 5)
     {
         *tau2 = 5;
+        Ik_theta2 = Ik_theta2_1;
     }
 
     if(*tau3 < -5)
     {
         *tau3 = -5;
+        Ik_theta3 = Ik_theta3_1;
     }
 
     if(*tau3 > 5)
     {
         *tau3 = 5;
+        Ik_theta3 = Ik_theta3_1;
     }
 
 
@@ -232,10 +335,19 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     theta2_motor_calc = theta2_calc + PI/2;
     theta3_motor_calc = theta3_calc + theta2motor - PI/2;
     //pks11 - sending reference signals and motor angles
-    Simulink_PlotVar1 = theta1motor;
-    Simulink_PlotVar2 = theta2motor;
-    Simulink_PlotVar3 = theta3motor;
+    Simulink_PlotVar1 = e_theta1;
+    Simulink_PlotVar2 = e_theta2;
+    Simulink_PlotVar3 = e_theta3;
     Simulink_PlotVar4 = theta3_desired;
+
+
+    //state update
+    e_theta1_1 = e_theta1;
+    e_theta2_1 = e_theta2;
+    e_theta3_1 = e_theta3;
+    Ik_theta1_1 = Ik_theta1;
+    Ik_theta2_1 = Ik_theta2;
+    Ik_theta3_1 = Ik_theta3;
 
 
     mycount++;

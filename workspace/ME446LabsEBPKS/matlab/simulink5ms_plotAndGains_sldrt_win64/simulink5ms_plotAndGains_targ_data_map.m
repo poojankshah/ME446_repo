@@ -248,7 +248,7 @@
                     section.data(1).logicalSrcIdx = 0;
                     section.data(1).dtTransOffset = 0;
 
-                    ;% simulink5ms_plotAndGains_B.theta1motor
+                    ;% simulink5ms_plotAndGains_B.error1motor
                     section.data(2).logicalSrcIdx = 1;
                     section.data(2).dtTransOffset = 1;
 
@@ -256,7 +256,7 @@
                     section.data(3).logicalSrcIdx = 2;
                     section.data(3).dtTransOffset = 2;
 
-                    ;% simulink5ms_plotAndGains_B.theta2motor
+                    ;% simulink5ms_plotAndGains_B.error2motor
                     section.data(4).logicalSrcIdx = 3;
                     section.data(4).dtTransOffset = 3;
 
@@ -264,7 +264,7 @@
                     section.data(5).logicalSrcIdx = 4;
                     section.data(5).dtTransOffset = 4;
 
-                    ;% simulink5ms_plotAndGains_B.theta3motor
+                    ;% simulink5ms_plotAndGains_B.error3motor
                     section.data(6).logicalSrcIdx = 5;
                     section.data(6).dtTransOffset = 5;
 
@@ -428,8 +428,8 @@
     ;%
 
 
-    targMap.checksum0 = 4007062042;
-    targMap.checksum1 = 728050836;
-    targMap.checksum2 = 3333864435;
-    targMap.checksum3 = 900375566;
+    targMap.checksum0 = 3978954272;
+    targMap.checksum1 = 3855920490;
+    targMap.checksum2 = 2684259059;
+    targMap.checksum3 = 594017927;
 

@@ -1,0 +1,39 @@
+%%pks11
+%%trajectory generation
+
+function [theta,thetadot,thetadotdot] = generatetrjaectory(time)
+a0_1 = 0;
+a1_1 = 0;
+a2_1 = 1.5;
+a3_1 = -1;
+
+a0_2 = -2;
+a1_2 = 6;
+a2_2 = -4.5;
+a3_2 = 1;
+time = time(:);
+
+if(time < 0)
+
+    theta = a0_1;
+    thetadot = a1_1;
+    thetadotdot = 2*a2_1;
+
+
+elseif (time> 0) && (time <=1) 
+    theta = a0_1 + a1_1*time + a2_1*(time.^2) + a3_1*(time.^3);
+    thetadot = a1_1 + 2*a2_1*time + 3*a3_1*(time.^2);
+    thetadotdot = 2*a2_1 + 6*a3_1*time;
+
+elseif(time > 1) && (time <=2))
+    theta = a0_2 + a1_2*time + a2_2*(time.^2) + a3_2*(time.^3);
+    thetadot = a1_2 + 2*a2_2*time + 3*a3_2*(time.^2);
+    thetadotdot = 2*a2_2 + 6*a3_2*time;
+else
+    theta = 0;
+    thetadot = 0;
+    thetadotdot = 0;
+end
+
+
+
