@@ -6,9 +6,9 @@
  *
  * Code generation for model "simulink5ms_plotAndGains".
  *
- * Model version              : 11.2
+ * Model version              : 11.4
  * Simulink Coder version : 9.9 (R2023a) 19-Nov-2022
- * C source code generated on : Fri Feb 23 11:02:07 2024
+ * C source code generated on : Fri Mar  1 10:44:46 2024
  *
  * Target selection: sldrt.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
@@ -858,11 +858,11 @@
 /* Block signals (default storage) */
 typedef struct {
   real_T Gain1;                        /* '<Root>/Gain1' */
-  real_T error1motor;                  /* '<Root>/plot1' */
+  real_T error1theta;                  /* '<Root>/plot1' */
   real_T Gain2;                        /* '<Root>/Gain2' */
-  real_T error2motor;                  /* '<Root>/plot2' */
+  real_T error2theta;                  /* '<Root>/plot2' */
   real_T Gain3;                        /* '<Root>/Gain3' */
-  real_T error3motor;                  /* '<Root>/plot3' */
+  real_T error3theta;                  /* '<Root>/plot3' */
   real_T theta3_desired;               /* '<Root>/plot4' */
   int32_T PacketInput1_o1[4];          /* '<S1>/Packet Input1' */
   int32_T PacketInput1_o2;             /* '<S1>/Packet Input1' */
