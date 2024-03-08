@@ -39,7 +39,7 @@ float Simulink_PlotVar2 = 0;
 float Simulink_PlotVar3 = 0;
 float Simulink_PlotVar4 = 0;
 
-//pks11
+//pks11 initialisation
 float  x_endeffector = 0;
 float  y_endeffector = 0;
 float  z_endeffector = 0;
@@ -68,6 +68,7 @@ float Omega3_old1 = 0;
 float Omega3_old2 = 0;
 float Omega3 = 0;
 
+//pks11 // theta desired and thetadot desired
 //theta2_desired and theta3_desired
 float theta1_desired = 0;
 float theta2_desired = 0;
@@ -94,7 +95,7 @@ float Ik_theta2 = 0;
 float Ik_theta3_1 = 0;
 float Ik_theta3 = 0;
 
-//error
+//tracking_error one step back
 float e_theta1_1 = 0;
 float e_theta2_1 = 0;
 float e_theta3_1 = 0;
@@ -120,16 +121,16 @@ float Kd2_PD = 2;
 float Kd3_PD = 2;
 
 float Kp1_PID = 100;
-float Kp2_PID = 200; //old 40
-float Kp3_PID = 150; // old 50
+float Kp2_PID = 200; //old 40 - tuning process
+float Kp3_PID = 150; // old 50 - tuning process
 
 float Kd1_PID = 2;
-float Kd2_PID = 7; // old 2
+float Kd2_PID = 7; // old 2 - tuning process
 float Kd3_PID = 7;
 
-float Ki1_PID = 10; // old 5
-float Ki2_PID = 75; // old 5
-float Ki3_PID = 75; // old 7.5
+float Ki1_PID = 10; // old 5 - tuning process
+float Ki2_PID = 75; // old 5 - tuning process
+float Ki3_PID = 75; // old 7.5 - tuning process
 
 float a0_1 = 0;
 float a1_1 = 0;
@@ -194,7 +195,9 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
         GpioDataRegs.GPBTOGGLE.bit.GPIO60 = 1; // Blink LED on Emergency Stop Box
     }
 
-    //pks11 defining the input
+    //pks11 defining the stepinput
+    // to provide the theta1, theta2 and theta3 : SQUARE WAVE
+    //Square wave specification : Amplitude : Pi/6 Frequency : 1/2 = 0.5s
     //    if ((mycount%1000)== 0) {
     //        theta1_desired = PI/6;
     //        theta2_desired = PI/6;
@@ -207,9 +210,9 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //    }
 
 
-
-    //Trajectory Generation
-    //Rising theta = 0 to theta = 0.5 in 0_1 second
+    //pks11
+    //Trajectory Generation Coefficient
+    //Rising theta = 0 to theta = 0.5 in 0-1 second
     a0_1 = 0;
     a1_1 = 0;
     a2_1 = 1.5;
@@ -221,34 +224,34 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     a2_2 = -4.5;
     a3_2 = 1;
     // pks11 : writing theta, thetadot, thetadotdot
-//    if (mycount <=1000){
-//        theta1_desired = a0_1 + a1_1*mycount*dt + a2_1*(pow(mycount*dt,2)) + a3_1*(pow(mycount*dt,3));
-//        theta1dot_desired =   a1_1 + 2*a2_1*(mycount*dt) + 3*a3_1*(pow(mycount*dt,2));
-//        theta1dotdot_desired =  2*a2_1 + 6*a3_1*mycount*dt;
-//    }
-//
-//    if((mycount>1000) && (mycount <=2000)){
-//        theta1_desired = a0_2 + a1_2*mycount*dt + a2_2*(pow(mycount*dt,2)) + a3_2*(pow(mycount*dt,3));
-//        theta1dot_desired =  a1_2 + 2*a2_2*(mycount*dt) + 3*a3_2*(pow(mycount*dt,2));
-//        theta1dotdot_desired =  2*a2_2 + 6*a3_2*mycount*dt;
-//    }
-//
-//    if(mycount > 2000){
-//        theta1_desired = 0;
-//        theta1dot_desired = 0;
-//        theta1dotdot_desired = 0;
-//    }
+    //    if (mycount <=1000){
+    //        theta1_desired = a0_1 + a1_1*mycount*dt + a2_1*(pow(mycount*dt,2)) + a3_1*(pow(mycount*dt,3));
+    //        theta1dot_desired =   a1_1 + 2*a2_1*(mycount*dt) + 3*a3_1*(pow(mycount*dt,2));
+    //        theta1dotdot_desired =  2*a2_1 + 6*a3_1*mycount*dt;
+    //    }
+    //
+    //    if((mycount>1000) && (mycount <=2000)){
+    //        theta1_desired = a0_2 + a1_2*mycount*dt + a2_2*(pow(mycount*dt,2)) + a3_2*(pow(mycount*dt,3));
+    //        theta1dot_desired =  a1_2 + 2*a2_2*(mycount*dt) + 3*a3_2*(pow(mycount*dt,2));
+    //        theta1dotdot_desired =  2*a2_2 + 6*a3_2*mycount*dt;
+    //    }
+    //
+    //    if(mycount > 2000){
+    //        theta1_desired = 0;
+    //        theta1dot_desired = 0;
+    //        theta1dotdot_desired = 0;
+    //    }
 
 
 
     //Since we are using same for theta2 theta3
-//    theta2_desired = theta1_desired;
-//    theta2dot_desired = theta1dot_desired;
-//    theta2dotdot_desired = theta1dotdot_desired;
-//
-//    theta3_desired = theta1_desired;
-//    theta3dot_desired = theta1dot_desired;
-//    theta3dotdot_desired = theta1dotdot_desired;
+    //    theta2_desired = theta1_desired;
+    //    theta2dot_desired = theta1dot_desired;
+    //    theta2dotdot_desired = theta1dotdot_desired;
+    //
+    //    theta3_desired = theta1_desired;
+    //    theta3dot_desired = theta1dot_desired;
+    //    theta3dotdot_desired = theta1dotdot_desired;
 
 
     printtheta1motor = theta1motor;
@@ -259,11 +262,14 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     theta3 = theta3motor;
     ////
     //pks11 Implmenting the theta dot filters
+    // filter type : IIR
     //theta1dot :: Omega1
     Omega1 = (theta1motor - Theta1_old)/0.001;
     Omega1 = (Omega1 + Omega1_old1 + Omega1_old2)/3.0;
     Theta1_old = theta1motor;
-    //order matters here. Why??
+    //order matters here. If you don't update in correct order
+    // Omega1_Old2 will get wrong value instead of getting Omega1_Old1
+    //State update for filters
     Omega1_old2 = Omega1_old1;
     Omega1_old1 = Omega1;
 
@@ -271,15 +277,19 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     Omega2 = (theta2motor - Theta2_old)/0.001;
     Omega2 = (Omega2 + Omega2_old1 + Omega2_old2)/3.0;
     Theta2_old = theta2motor;
-    //order matters here. Why??
+    //order matters here. If you don't update in correct order
+    // Omega2_Old2 will get wrong value instead of getting Omega2_Old1
+    //State update for filters
     Omega2_old2 = Omega2_old1;
     Omega2_old1 = Omega2;
 
-    //theta2dot : Omega2
+    //theta3dot : Omega3
     Omega3 = (theta3motor - Theta3_old)/0.001;
     Omega3 = (Omega3 + Omega3_old1 + Omega3_old2)/3.0;
     Theta3_old = theta3motor;
-    //order matters here. Why??
+    //order matters here. If you don't update in correct order
+    // Omega3_Old2 will get wrong value instead of getting Omega3_Old1
+    //State update for filters
     Omega3_old2 = Omega3_old1;
     Omega3_old1 = Omega3;
 
@@ -297,16 +307,17 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //pid controller Adaptive gains!
     if(fabs(e_theta1) < 0.08)
     {
-
+        //pks11
         //*tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);  //pks11 : Older PID
-        //*tau1 = J1*theta1dotdot_desired + Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 + Kd1_PID*(theta1dot_desired - Omega1);
+        //*tau1 = J1*theta1dotdot_desired + Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 + Kd1_PID*(theta1dot_desired - Omega1); // pks11 : Feedforward control (PID)
+        //Feedforwad Control : we are trying to provide the information of the future : It can be done from providing some information about the acceleration
         *tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);
         Ik_theta1 = Ik_theta1_1 + (e_theta1 + e_theta1_1)*0.001;
     }
     else
     {
         Ik_theta1 = 0;
-        //*tau1 =J1*theta1dotdot_desired + Kp1_PD*(theta1_desired - theta1motor) + Kd1_PD*(theta1dot_desired - Omega1);
+        //*tau1 =J1*theta1dotdot_desired + Kp1_PD*(theta1_desired - theta1motor) + Kd1_PD*(theta1dot_desired - Omega1);// pks11 : Feedforward control (PD)
         *tau1 = Kp1_PID*(theta1_desired - theta1motor) - Kd1_PID*(Omega1);
     }
 
@@ -314,21 +325,21 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     if(fabs(e_theta2) < 0.08)
     {
 
-        //*tau2 = J2*theta2dotdot_desired + Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 + Kd2_PID*(theta2dot_desired - Omega2);
+        //*tau2 = J2*theta2dotdot_desired + Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 + Kd2_PID*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PID)
         *tau2 = Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 - Kd2_PID*(Omega2);
         Ik_theta2 = Ik_theta2_1 + (e_theta2 + e_theta2_1)*0.001;
     }
     else
     {
         Ik_theta2 = 0;
-        //*tau2 = J2*theta2dotdot_desired + Kp2_PD*(theta2_desired - theta2motor) + Kd2_PD*(theta2dot_desired - Omega2);
+        //*tau2 = J2*theta2dotdot_desired + Kp2_PD*(theta2_desired - theta2motor) + Kd2_PD*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PD)
         *tau2 = Kp2_PID*(theta2_desired - theta2motor) - Kd2_PID*(Omega2);
     }
 
     //theta3 control
     if(fabs(e_theta3) < 0.08)
     {
-        //*tau3 = J3*theta3dotdot_desired + Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 + Kd3_PID*(theta3dot_desired - Omega3);
+        //*tau3 = J3*theta3dotdot_desired + Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 + Kd3_PID*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PID)
         *tau3 = Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 - Kd3_PID*(Omega3);
         Ik_theta3 = Ik_theta3_1 + (e_theta3 + e_theta3_1)*0.001;
     }
@@ -336,19 +347,22 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     else
     {
         Ik_theta3 = 0;
-        //*tau3 = J3*theta3dotdot_desired + Kp3_PD*(theta3_desired - theta3motor) + Kd3_PD*(theta3dot_desired - Omega3);
+        //*tau3 = J3*theta3dotdot_desired + Kp3_PD*(theta3_desired - theta3motor) + Kd3_PD*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PD)
         *tau3 = Kp3_PID*(theta3_desired - theta3motor) - Kd3_PID*(Omega3);
     }
 
 
-    //// PD
+    //// PD control
     //pks11 calculating the taus // pd controller
     //    *tau1 = Kp1*(theta1_desired - theta1motor) - Kd1*(Omega1);
     //    *tau2 = Kp2*(theta2_desired - theta2motor) - Kd2*(Omega2);
     //    *tau3 = Kp3*(theta3_desired - theta3motor) - Kd3*(Omega3);
 
-
+    //pks11
     //Saturation block
+    // this saturation block is designed such that it will make sure to stop integrating when torque saturation limit is reached
+    // NOTE : we are not zeroing the integration, however, we are stopping to add more values
+    // Antiwindup
     if(*tau1 < -5)
     {
         *tau1 = -5;
@@ -398,13 +412,19 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     y_endeffector = 0.254*sin(theta1motor)*(cos(theta3motor) + sin(theta2motor));
     z_endeffector = 0.254*cos(theta2motor) - 0.254*sin(theta3motor) + 0.254;
 
+
+
+    //pks11
+    //FUN TRAJECTORY
+    // TRAJECTORY CHOOSE : Planner Circle with radius 0.1m, starting position : (0.4,01,0.35)
+    // Center : (0.3,0.1,0.35)
+    // FREQUENCY : 1/5 = 0.2 Hz (takes 5 seconds to finish 1 circle)
+
+
     //Aplying Trajecory of my own //pks11
-    if(mycount<5000)
-    {
-        x_endeffector = 0.45 + 0.1*cos(2*PI*dt*mycount/T);
-        y_endeffector = 0 + 0.1*sin(2*PI*dt*mycount/T);
-    }
-    z_endeffector = 0.15;
+    x_endeffector = 0.3 + 0.1*cos(2*PI*dt*mycount/T);
+    y_endeffector = 0.1 + 0.1*sin(2*PI*dt*mycount/T);
+    z_endeffector = 0.35;
 
     //pks11_ calculating thetas from inverese kinematics from the geomteric approach
     theta1_calc = atan(y_endeffector/x_endeffector);
@@ -423,9 +443,10 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     theta2_desired = theta2_motor_calc;
     theta3_desired = theta3_motor_calc;
     //pks11 - sending reference signals and motor angles
-    Simulink_PlotVar1 = e_theta1;
-    Simulink_PlotVar2 = e_theta2;
-    Simulink_PlotVar3 = e_theta3;
+    //this is the interface between simulink and codecomposer!
+    Simulink_PlotVar1 = theta1_desired;
+    Simulink_PlotVar2 = theta2_desired;
+    Simulink_PlotVar3 = theta3_desired;
     Simulink_PlotVar4 = theta3_desired;
 
 
