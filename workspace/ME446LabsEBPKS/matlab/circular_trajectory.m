@@ -5,7 +5,7 @@
 % dt : step time
 % L : Total number of steps
 % t : from time 0 to T with dt
-T =5; 
+T =5;
 dt = 0.001;
 L_step = T/dt;
 
