@@ -151,6 +151,7 @@ float J3 = 0.0128;
 float T = 5;
 
 
+
 //pks11 lab3 defining friction parameters
 float u_fric_1 = 0;
 float minimum_v_1 = 0.1;
@@ -234,8 +235,8 @@ float Kdy_task = 6;
 float Kdz_task = 6;
 
 
-float xtask_d = 0.25;
-float ytask_d = 0.25;
+float xtask_d = 0.3;
+float ytask_d = 0.3;
 float ztask_d = 0.25;
 float vxtask_d = 0;
 float vytask_d = 0;
@@ -255,6 +256,44 @@ float vy_endeffector_old2 = 0;
 float z_endeffector_old = 0;
 float vz_endeffector_old1 = 0;
 float vz_endeffector_old2 = 0;
+
+float Fzcmd = 0; //giving force
+float Kt = 6;
+
+//Part 4 : Impedence Control
+float Rwn_11  = 0;
+float Rwn_12 = 0;
+float Rwn_13 = 0;
+float Rwn_21 = 0;
+float Rwn_22 = 0;
+float Rwn_23 = 0;
+float Rwn_31 = 0;
+float Rwn_32 = 0;
+float Rwn_33 = 0;
+
+float thetaz_r = 0;
+float thetax_r = 0;
+float thetay_r = 0;
+
+float Kpxn = 200; //Kpx_task (nEED TO RETUNE) As it was not compliant
+float Kpyn = 200; // Kpy_task
+float Kpzn = 200; //Kpz_task
+
+float Kdxn = 4; // Kdx_task
+float Kdyn = 6; // Kdy_task
+float Kdzn = 6; //Kdz_task
+
+//straight line motion
+float t_total = 4;
+float xa_taskd = 0.25;
+float ya_taskd = 0;
+float za_taskd = 0.25;
+
+float xb_taskd = 0.4;
+float yb_taskd = 0;
+float zb_taskd = 0.25;
+float t = 0;
+int t_int = 0;
 
 void mains_code(void);
 
@@ -636,6 +675,67 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
     *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
     *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
+
+    //pks11 feedforward force
+    *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_13*Fzcmd/Kt;
+    *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_23*Fzcmd/Kt;
+    *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_33*Fzcmd/Kt;
+
+    //Defining the rotation matrix
+    //float thetaz_r = pi/4;
+    //float thetax_r = 0;
+    //float thetay_r = 0;
+
+    Rwn_11 = cos(thetaz_r)*cos(thetay_r) - sin(thetaz_r)*sin(thetax_r)*sin(thetay_r);
+    Rwn_12 = -1*sin(thetaz_r)*cos(thetax_r);
+    Rwn_13 = cos(thetaz_r)*sin(thetay_r) + sin(thetaz_r)*sin(thetax_r)*cos(thetay_r);
+    Rwn_21 = sin(thetaz_r)*cos(thetay_r) + cos(thetaz_r)*sin(thetax_r)*sin(thetay_r);
+    Rwn_22 = cos(thetaz_r)*cos(thetax_r);
+    Rwn_23 = sin(thetaz_r)*sin(thetay_r) - cos(thetaz_r)*sin(thetax_r)*cos(thetay_r);
+    Rwn_31 = -1*cos(thetax_r)*sin(thetay_r);
+    Rwn_32 = sin(thetax_r);
+    Rwn_33 = cos(thetax_r)*cos(thetay_r);
+
+
+    *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+    *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+    *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+
+
+    //Straight line following :
+    //calculation of xtask_d
+    //    float t_total = 4;
+    //    float xa_taskd = 0.25;
+    //    float ya_taskd = 0.25;
+    //    float za_taskd = 0.25;
+    //
+    //    float xb_taskd = 0.4;
+    //    float yb_taskd = 0.25;
+    //    float zb_taskd = 0.25;
+
+    t_int = mycount/2000;
+    t = t_int +  (mycount%2000)/1000;
+
+
+
+    if(t_int % 2 == 0)
+
+    {
+        xtask_d = (xb_taskd-xa_taskd)*((mycount%2000)/1000)/2 + xa_taskd;
+        ytask_d = (yb_taskd-ya_taskd)*((mycount%2000)/1000)/2 + ya_taskd;
+        ztask_d = (zb_taskd-za_taskd)*((mycount%2000)/1000)/2 + za_taskd;
+    }
+
+    if(t_int%2 !=0)
+    {
+        xtask_d = (xa_taskd-xb_taskd)*((mycount%2000)/1000)/2 + xb_taskd;
+        ytask_d = (ya_taskd-yb_taskd)*((mycount%2000)/1000)/2 + yb_taskd;
+        ztask_d = (za_taskd-zb_taskd)*((mycount%2000)/1000)/2 + zb_taskd;
+    }
+
+    *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+    *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+    *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
 
 
 
