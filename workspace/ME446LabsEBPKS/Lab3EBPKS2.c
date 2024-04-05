@@ -271,29 +271,35 @@ float Rwn_31 = 0;
 float Rwn_32 = 0;
 float Rwn_33 = 0;
 
-float thetaz_r = 0;
+float thetaz_r = PI/4; //for xN alligned with line
 float thetax_r = 0;
 float thetay_r = 0;
 
-float Kpxn = 200; //Kpx_task (nEED TO RETUNE) As it was not compliant
+//float Kpxn = 200; //Kpx_task (nEED TO RETUNE) As it was not compliant
+float Kpxn = 800; //Kpxn need to bbe retuned (earlier 200)
 float Kpyn = 200; // Kpy_task
 float Kpzn = 200; //Kpz_task
 
-float Kdxn = 4; // Kdx_task
+//float Kdxn = 4; // Kdx_task new
+float Kdxn = 100; // maybe reduced a bit; earlier 4
 float Kdyn = 6; // Kdy_task
-float Kdzn = 6; //Kdz_task
+//float Kdzn = 6; //Kdz_task
+float Kdzn = 50; // maybe reduced a bit; earlier 6
 
 //straight line motion
 float t_total = 4;
 float xa_taskd = 0.25;
 float ya_taskd = 0;
-float za_taskd = 0.25;
+float za_taskd = 0.35;
 
-float xb_taskd = 0.4;
-float yb_taskd = 0;
-float zb_taskd = 0.25;
+float xb_taskd = 0.35;
+float yb_taskd = 0.1;
+float zb_taskd = 0.35;
 float t = 0;
 int t_int = 0;
+
+float t_try1 = 0;
+int TIME = 2;
 
 void mains_code(void);
 
@@ -357,16 +363,16 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //pks11
     //Trajectory Generation Coefficient
     //Rising theta = 0 to theta = 0.5 in 0-1 second
-    a0_1 = 0;
-    a1_1 = 0;
-    a2_1 = 1.5;
-    a3_1 = -1;
-
-    //declining, theta - 0.5 to theta = 0 in 1-2 second
-    a0_2 = -2;
-    a1_2 = 6;
-    a2_2 = -4.5;
-    a3_2 = 1;
+//    a0_1 = 0;
+//    a1_1 = 0;
+//    a2_1 = 1.5;
+//    a3_1 = -1;
+//
+//    //declining, theta - 0.5 to theta = 0 in 1-2 second
+//    a0_2 = -2;
+//    a1_2 = 6;
+//    a2_2 = -4.5;
+//    a3_2 = 1;
     // pks11 : writing theta, thetadot, thetadotdot
     //    if (mycount <=1000){
     //        theta1_desired = a0_1 + a1_1*mycount*dt + a2_1*(pow(mycount*dt,2)) + a3_1*(pow(mycount*dt,3));
@@ -405,95 +411,95 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //pks11 adding a variable
     theta3 = theta3motor;
     ////
-    //pks11 Implmenting the theta dot filters
-    // filter type : IIR
-    //theta1dot :: Omega1
-    Omega1 = (theta1motor - Theta1_old)/0.001;
-    Omega1 = (Omega1 + Omega1_old1 + Omega1_old2)/3.0;
-    Theta1_old = theta1motor;
-    //order matters here. If you don't update in correct order
-    // Omega1_Old2 will get wrong value instead of getting Omega1_Old1
-    //State update for filters
-    Omega1_old2 = Omega1_old1;
-    Omega1_old1 = Omega1;
-
-    //theta2dot : Omega2
-    Omega2 = (theta2motor - Theta2_old)/0.001;
-    Omega2 = (Omega2 + Omega2_old1 + Omega2_old2)/3.0;
-    Theta2_old = theta2motor;
-    //order matters here. If you don't update in correct order
-    // Omega2_Old2 will get wrong value instead of getting Omega2_Old1
-    //State update for filters
-    Omega2_old2 = Omega2_old1;
-    Omega2_old1 = Omega2;
-
-    //theta3dot : Omega3
-    Omega3 = (theta3motor - Theta3_old)/0.001;
-    Omega3 = (Omega3 + Omega3_old1 + Omega3_old2)/3.0;
-    Theta3_old = theta3motor;
-    //order matters here. If you don't update in correct order
-    // Omega3_Old2 will get wrong value instead of getting Omega3_Old1
-    //State update for filters
-    Omega3_old2 = Omega3_old1;
-    Omega3_old1 = Omega3;
-
-    /// pks11 Tracking errors calculation
-    //trackingerror_theta1
-
-    e_theta1 = theta1_desired - theta1motor;
-
-    //trackingerror_theta2
-    e_theta2 = theta2_desired - theta2motor;
-
-    //trackingerror_theta3
-    e_theta3 = theta3_desired - theta3motor;
-
-    //pid controller Adaptive gains!
-    if(fabs(e_theta1) < 0.08)
-    {
-        //pks11
-        //*tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);  //pks11 : Older PID
-        //*tau1 = J1*theta1dotdot_desired + Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 + Kd1_PID*(theta1dot_desired - Omega1); // pks11 : Feedforward control (PID)
-        //Feedforwad Control : we are trying to provide the information of the future : It can be done from providing some information about the acceleration
-        *tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);
-        Ik_theta1 = Ik_theta1_1 + (e_theta1 + e_theta1_1)*0.001;
-    }
-    else
-    {
-        Ik_theta1 = 0;
-        //*tau1 =J1*theta1dotdot_desired + Kp1_PD*(theta1_desired - theta1motor) + Kd1_PD*(theta1dot_desired - Omega1);// pks11 : Feedforward control (PD)
-        *tau1 = Kp1_PID*(theta1_desired - theta1motor) - Kd1_PID*(Omega1);
-    }
-
-    //theta2 control
-    if(fabs(e_theta2) < 0.08)
-    {
-
-        //*tau2 = J2*theta2dotdot_desired + Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 + Kd2_PID*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PID)
-        *tau2 = Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 - Kd2_PID*(Omega2);
-        Ik_theta2 = Ik_theta2_1 + (e_theta2 + e_theta2_1)*0.001;
-    }
-    else
-    {
-        Ik_theta2 = 0;
-        //*tau2 = J2*theta2dotdot_desired + Kp2_PD*(theta2_desired - theta2motor) + Kd2_PD*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PD)
-        *tau2 = Kp2_PID*(theta2_desired - theta2motor) - Kd2_PID*(Omega2);
-    }
-
-    //theta3 control
-    if(fabs(e_theta3) < 0.08)
-    {
-        //*tau3 = J3*theta3dotdot_desired + Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 + Kd3_PID*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PID)
-        *tau3 = Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 - Kd3_PID*(Omega3);
-        Ik_theta3 = Ik_theta3_1 + (e_theta3 + e_theta3_1)*0.001;
-    }
-
-    else
-    {
-        Ik_theta3 = 0;
-        //*tau3 = J3*theta3dotdot_desired + Kp3_PD*(theta3_desired - theta3motor) + Kd3_PD*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PD)
-        *tau3 = Kp3_PID*(theta3_desired - theta3motor) - Kd3_PID*(Omega3);
-    }
+//    //pks11 Implmenting the theta dot filters
+//    // filter type : IIR
+//    //theta1dot :: Omega1
+//    Omega1 = (theta1motor - Theta1_old)/0.001;
+//    Omega1 = (Omega1 + Omega1_old1 + Omega1_old2)/3.0;
+//    Theta1_old = theta1motor;
+//    //order matters here. If you don't update in correct order
+//    // Omega1_Old2 will get wrong value instead of getting Omega1_Old1
+//    //State update for filters
+//    Omega1_old2 = Omega1_old1;
+//    Omega1_old1 = Omega1;
+//
+//    //theta2dot : Omega2
+//    Omega2 = (theta2motor - Theta2_old)/0.001;
+//    Omega2 = (Omega2 + Omega2_old1 + Omega2_old2)/3.0;
+//    Theta2_old = theta2motor;
+//    //order matters here. If you don't update in correct order
+//    // Omega2_Old2 will get wrong value instead of getting Omega2_Old1
+//    //State update for filters
+//    Omega2_old2 = Omega2_old1;
+//    Omega2_old1 = Omega2;
+//
+//    //theta3dot : Omega3
+//    Omega3 = (theta3motor - Theta3_old)/0.001;
+//    Omega3 = (Omega3 + Omega3_old1 + Omega3_old2)/3.0;
+//    Theta3_old = theta3motor;
+//    //order matters here. If you don't update in correct order
+//    // Omega3_Old2 will get wrong value instead of getting Omega3_Old1
+//    //State update for filters
+//    Omega3_old2 = Omega3_old1;
+//    Omega3_old1 = Omega3;
+//
+//    /// pks11 Tracking errors calculation
+//    //trackingerror_theta1
+//
+//    e_theta1 = theta1_desired - theta1motor;
+//
+//    //trackingerror_theta2
+//    e_theta2 = theta2_desired - theta2motor;
+//
+//    //trackingerror_theta3
+//    e_theta3 = theta3_desired - theta3motor;
+//
+//    //pid controller Adaptive gains!
+//    if(fabs(e_theta1) < 0.08)
+//    {
+//        //pks11
+//        //*tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);  //pks11 : Older PID
+//        //*tau1 = J1*theta1dotdot_desired + Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 + Kd1_PID*(theta1dot_desired - Omega1); // pks11 : Feedforward control (PID)
+//        //Feedforwad Control : we are trying to provide the information of the future : It can be done from providing some information about the acceleration
+//        *tau1 = Kp1_PID*(theta1_desired - theta1motor) + Ki1_PID*Ik_theta1 - Kd1_PID*(Omega1);
+//        Ik_theta1 = Ik_theta1_1 + (e_theta1 + e_theta1_1)*0.001;
+//    }
+//    else
+//    {
+//        Ik_theta1 = 0;
+//        //*tau1 =J1*theta1dotdot_desired + Kp1_PD*(theta1_desired - theta1motor) + Kd1_PD*(theta1dot_desired - Omega1);// pks11 : Feedforward control (PD)
+//        *tau1 = Kp1_PID*(theta1_desired - theta1motor) - Kd1_PID*(Omega1);
+//    }
+//
+//    //theta2 control
+//    if(fabs(e_theta2) < 0.08)
+//    {
+//
+//        //*tau2 = J2*theta2dotdot_desired + Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 + Kd2_PID*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PID)
+//        *tau2 = Kp2_PID*(theta2_desired - theta2motor) + Ki2_PID*Ik_theta2 - Kd2_PID*(Omega2);
+//        Ik_theta2 = Ik_theta2_1 + (e_theta2 + e_theta2_1)*0.001;
+//    }
+//    else
+//    {
+//        Ik_theta2 = 0;
+//        //*tau2 = J2*theta2dotdot_desired + Kp2_PD*(theta2_desired - theta2motor) + Kd2_PD*(theta2dot_desired - Omega2); // pks11 : Feedforward control (PD)
+//        *tau2 = Kp2_PID*(theta2_desired - theta2motor) - Kd2_PID*(Omega2);
+//    }
+//
+//    //theta3 control
+//    if(fabs(e_theta3) < 0.08)
+//    {
+//        //*tau3 = J3*theta3dotdot_desired + Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 + Kd3_PID*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PID)
+//        *tau3 = Kp3_PID*(theta3_desired - theta3motor) + Ki3_PID*Ik_theta3 - Kd3_PID*(Omega3);
+//        Ik_theta3 = Ik_theta3_1 + (e_theta3 + e_theta3_1)*0.001;
+//    }
+//
+//    else
+//    {
+//        Ik_theta3 = 0;
+//        //*tau3 = J3*theta3dotdot_desired + Kp3_PD*(theta3_desired - theta3motor) + Kd3_PD*(theta3dot_desired - Omega3); // pks11 : Feedforward control (PD)
+//        *tau3 = Kp3_PID*(theta3_desired - theta3motor) - Kd3_PID*(Omega3);
+//    }
 
 
     //// PD control
@@ -546,6 +552,7 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
 
 
     //pks11 lab3 new code
+    //part 1
     //adding friction coefficient to joints to reduce stiffness
     //joint 1 : *tau1, Omega1
     //pks11 lab3 defining friction parameters
@@ -603,7 +610,7 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     *tau2 = fric_coeff_2*u_fric_2;
     *tau3 = fric_coeff_3*u_fric_3;
 
-    //PD control for TASK SPACE
+    //PD control for TASK SPACE CALCULATION
     //pks11 adding a calculation of h03 with motor angles
     //Steps Folllowed : Calculated forward kinemtics from the DH table and provide the coordinates of endeffector which is [0;0;0] in frame 3
     // Measured the relationship between theta angles and joint motors angles.
@@ -639,7 +646,8 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     vz_endeffector_old1 = vz_endeffector;
 
 
-    // Jacobian Transpose
+    // Jacobian Transpose calculation
+    // We have used Jacobian for CRS robot
     cosq1 = cos(theta1motor);
     sinq1 = sin(theta1motor);
     cosq2 = cos(theta2motor);
@@ -672,20 +680,35 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //    float vytask_d = 0;
     //    float vztask_d = 0;
 
+
+    // Lab 3 part 2,3
+    // From part 2, we get approximately friction values and friction compensation;
+    // Thus, PD control for task space control  is implemented by adding this friction coefficient to older task space control
+    // task space control : torque = [Jtranspose*Force]
+    //FOrce = Kp*(position error) + Kd*(Velocity Error) // tuning for position and velocity
+    //friction coeff factor calculation : (FOR AVOIDING BOUNCING OF ROBOT)
+    // Tried to Kp Kd of Z 0 and see the bouncing robot;  thus from that evalaute the friction factor (verify) : So that bouncing is not visible
     *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
     *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
     *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
 
-    //pks11 feedforward force
+    //pks11
+    // Adding feedforward element :
+    // Kt is assumed to be 6
+    // Giving the negative force compensation varies from 0 to -20
+    // By implementing this as feedforward component  (Jt*[F/kt]); we can feel the force by holding the robot at particular Z direction AND changing this Ft
     *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_13*Fzcmd/Kt;
     *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_23*Fzcmd/Kt;
     *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_33*Fzcmd/Kt;
 
     //Defining the rotation matrix
+    //Lab 3 part 4
     //float thetaz_r = pi/4;
     //float thetax_r = 0;
     //float thetay_r = 0;
-
+    // Rotation Matrix :
+    //frame N, and the world coordinate frame of the robot frame W. Frame N is found by rotating (thetaZ) about the z axis and then rotating thetax about the x axis and then thetay
+    // about the y axis. Rwn_zxy :
     Rwn_11 = cos(thetaz_r)*cos(thetay_r) - sin(thetaz_r)*sin(thetax_r)*sin(thetay_r);
     Rwn_12 = -1*sin(thetaz_r)*cos(thetax_r);
     Rwn_13 = cos(thetaz_r)*sin(thetay_r) + sin(thetaz_r)*sin(thetax_r)*cos(thetay_r);
@@ -696,49 +719,71 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     Rwn_32 = sin(thetax_r);
     Rwn_33 = cos(thetax_r)*cos(thetay_r);
 
+    //pks11
+    //impedence control
+    //Lab 3 Ex 4
+    //Impedence control consists of : Friction Compensation; Force control in Xn,Yn,Zn (This is calculated with the help of Position error and velocity error)
+    // Now, important thing to note is; Rotational frame : For example, Rwn_ij is i th row and jth column of Rotation matrix of N frame with World frame as reference.
+    // We want to have impedence control in the Nth frame and hence we are utilising rotational matrix to evalaute impedence control in XN, YN,ZN
+    // NOTE : position error and velocity errors are defined in the world frame; that means it's going to follow trajectory based on world frame coordinates
+    // Now, if you weaken your axis in any direction, it will be with respect to N frame not world frame.
+    // We take help of Rotation matrix to convert from world coordinate frame to normal coordinate frame
+
 
     *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
     *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
     *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
 
 
-    //Straight line following :
-    //calculation of xtask_d
-    //    float t_total = 4;
-    //    float xa_taskd = 0.25;
-    //    float ya_taskd = 0.25;
-    //    float za_taskd = 0.25;
-    //
-    //    float xb_taskd = 0.4;
-    //    float yb_taskd = 0.25;
-    //    float zb_taskd = 0.25;
+    //pks11
+    //lab3 exercise : 5
+    //writing the time function for the staright line trajectory for going to-fro;
+    // Time taken for straightline : 2s // FIXING THESE
+    // total time for to-fro : 2+2 = 4s (freqeuncy of wave : 1/4 = 0.25Hz)
+    t_int = mycount/(TIME*1000.0); //returning the integer value (2500/2000 = 1)
+    t_try1 = fmod((mycount/1000.0) , TIME); // this is be our time variable varing from 0 to 2;
 
-    t_int = mycount/2000;
-    t = t_int +  (mycount%2000)/1000;
-
-
-
-    if(t_int % 2 == 0)
+    if(t_int % 2 == 0) //(going from point A to point B in TIME T) // (0 to 1; 2 to 3; ....)
 
     {
-        xtask_d = (xb_taskd-xa_taskd)*((mycount%2000)/1000)/2 + xa_taskd;
-        ytask_d = (yb_taskd-ya_taskd)*((mycount%2000)/1000)/2 + ya_taskd;
-        ztask_d = (zb_taskd-za_taskd)*((mycount%2000)/1000)/2 + za_taskd;
+        xtask_d = (xb_taskd-xa_taskd)*(t_try1)/TIME + xa_taskd; // (xb-xa)*(time/TOTAL TIME); same for y and z
+        ytask_d = (yb_taskd-ya_taskd)*(t_try1)/TIME + ya_taskd;
+        ztask_d = (zb_taskd-za_taskd)*(t_try1)/TIME + za_taskd;
+        vxtask_d = (xb_taskd - xa_taskd)/TIME; // Defining the velocity for the better control; te trajectory is straight line thus; velocity will be slope of that line
+        vytask_d = (yb_taskd - ya_taskd)/TIME;
+        vztask_d = (zb_taskd - za_taskd)/TIME;
     }
 
-    if(t_int%2 !=0)
+    if(t_int % 2 !=0) //(going from Point B to point A in TIME T) // (1 to 2; 3 to 4;....)
     {
-        xtask_d = (xa_taskd-xb_taskd)*((mycount%2000)/1000)/2 + xb_taskd;
-        ytask_d = (ya_taskd-yb_taskd)*((mycount%2000)/1000)/2 + yb_taskd;
-        ztask_d = (za_taskd-zb_taskd)*((mycount%2000)/1000)/2 + zb_taskd;
+        xtask_d = (xa_taskd-xb_taskd)*(t_try1)/TIME + xb_taskd;
+        ytask_d = (ya_taskd-yb_taskd)*(t_try1)/TIME + yb_taskd;
+        ztask_d = (za_taskd-zb_taskd)*(t_try1)/TIME + zb_taskd;
+        vxtask_d = (xa_taskd - xb_taskd)/TIME;
+        vytask_d = (ya_taskd - yb_taskd)/TIME;
+        vztask_d = (za_taskd - zb_taskd)/TIME;
     }
+
+    //pks11
+    //Impedence Control Implementation :
+    //Lab 3 Ex 5
+    //Impedence control consists of : Friction Compensation; Force control in Xn,Yn,Zn (This is calculated with the help of Position error and velocity error)
+    // Now, important thing to note is; Rotational frame : For example, Rwn_ij is i th row and jth column of Rotation matrix of N frame with World frame as reference.
+    // We want to have impedence control in the Nth frame and hence we are utilising rotational matrix to evalaute impedence control in XN, YN,ZN
+    // NOTE : position error and velocity errors are defined in the world frame; that means it's going to follow trajectory based on world frame coordinates
+    // Now, if you weaken your axis in any direction, it will be with respect to N frame not world frame.
+    // We take help of Rotation matrix to convert from world coordinate frame to normal coordinate frame
 
     *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
     *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
     *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
 
 
-
+    //pks11
+    //torque saturation code:
+    // if tourque is greater than 5; saturate to 5
+    //if torque is less than -5, saturate to -5
+    //this is for all 3 joints
 
     if(*tau1 < -5)
     {
@@ -802,10 +847,10 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //    theta3_desired = theta3_motor_calc;
     //pks11 - sending reference signals and motor angles
     //this is the interface between simulink and codecomposer!
-    Simulink_PlotVar1 = x_endeffector;
-    Simulink_PlotVar2 = y_endeffector;
-    Simulink_PlotVar3 = z_endeffector;
-    Simulink_PlotVar4 = theta3_desired;
+    Simulink_PlotVar1 = xtask_d;
+    Simulink_PlotVar2 = x_endeffector;
+    Simulink_PlotVar3 = ytask_d;
+    Simulink_PlotVar4 = y_endeffector;
 
 
     //state update
