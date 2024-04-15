@@ -40,9 +40,9 @@ float Simulink_PlotVar3 = 0;
 float Simulink_PlotVar4 = 0;
 
 //pks11 initialisation
-float  x_endeffector = 0;
+float  x_endeffector = 0.15;
 float  y_endeffector = 0;
-float  z_endeffector = 0;
+float  z_endeffector = 0.43;
 
 float theta1_calc = 0;
 float theta2_calc = 0;
@@ -226,13 +226,13 @@ float RT33 = 0;
 
 
 //TASK SPACE CONTROL
-float Kpx_task = 100;
-float Kpy_task = 200;
-float Kpz_task = 200;
+float Kpx_task = 800; //100
+float Kpy_task = 800; //200
+float Kpz_task = 800; // 200
 
-float Kdx_task = 4;
-float Kdy_task = 6;
-float Kdz_task = 6;
+float Kdx_task = 40; // 4
+float Kdy_task = 60; // 6
+float Kdz_task = 60; //6
 
 
 float xtask_d = 0.15;
@@ -271,7 +271,7 @@ float Rwn_31 = 0;
 float Rwn_32 = 0;
 float Rwn_33 = 0;
 
-float thetaz_r = PI/4; //for xN alligned with line
+float thetaz_r = 0; //for xN alligned with line
 float thetax_r = 0;
 float thetay_r = 0;
 
@@ -304,6 +304,10 @@ int TIME = 2;
 //pks11//
 //writing or specifing structure of waypoints;
 
+//waypoint description
+//xdes,ydes,zdes : waypoint description
+// tdes : global time to reach the waypoint
+
 typedef struct{
     float xdes;
     float ydes;
@@ -312,17 +316,19 @@ typedef struct{
     int controllerdesired;
 } waypoint;
 
-waypoint point[] = {{0.15,0,0.43,1,1},{0,0.34,0.35,2,1}};
+
+waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,2,1},{0.03254,0.34873,0.25254,3,1},{0.03013,0.35212,0.12072,4,2}};
 
 //pks11 waypoint specification
-int num_waypoint = 0;
-int waypoint_index = 0;
-
+int num_waypoint = 0; // total number of waypoint
+int waypoint_index = 0; // existing waypoint index
+int controllerdesired = 1;
 //pks11
-float time_global = 0;
-float time_traj = 0;
-float time_local = 0;
+float time_global = 0; // global time clock
+float time_traj = 0; // time taken to reach i-1 waypoint to ith waypoint
+float time_local = 0; // local time for travelling from i-1 waypoint to i waypoint
 float temp = 0;
+float lastpoint_flag = 0;
 
 void mains_code(void);
 
@@ -375,8 +381,23 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     num_waypoint = sizeof(point)/sizeof(point[0]);
     temp = sizeof(point);
 
+    //starting to first waypoint
+    if(waypoint_index == 0)
+    {
+        time_local = time_global;
+        time_traj = point[waypoint_index].tdes;
+        xtask_d = x_endeffector + time_local*(point[waypoint_index].xdes - x_endeffector)/time_traj;
+        ytask_d = y_endeffector + time_local*(point[waypoint_index].ydes - y_endeffector)/time_traj;
+        ztask_d = z_endeffector + time_local*(point[waypoint_index].zdes - z_endeffector)/time_traj;
 
-    if(time_global>=point[waypoint_index].tdes && waypoint_index < num_waypoint)
+        vxtask_d = (point[waypoint_index].xdes - x_endeffector)/time_traj;
+        vytask_d = (point[waypoint_index].ydes - y_endeffector)/time_traj;
+        vztask_d = (point[waypoint_index].zdes - z_endeffector)/time_traj;
+        controllerdesired = 1;
+    }
+
+
+    if(time_global > point[waypoint_index].tdes && waypoint_index < num_waypoint-1)
     {
         time_traj = point[waypoint_index+1].tdes - point[waypoint_index].tdes;
         time_local = (time_global - point[waypoint_index].tdes);
@@ -389,23 +410,29 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
         vytask_d = (point[waypoint_index+1].ydes - point[waypoint_index].ydes)/time_traj;
         vztask_d = (point[waypoint_index+1].zdes - point[waypoint_index].zdes)/time_traj;
 
+        controllerdesired = point[waypoint_index].controllerdesired;
 
-        if(fabs(time_global - point[waypoint_index+1].tdes) <= 0.00001)
+
+        if(fabs(time_global - point[waypoint_index+1].tdes) <= 0.0005)
         {
             waypoint_index  = waypoint_index + 1;
+            lastpoint_flag = 1;
 
         }
     }
 
-    if(waypoint_index == num_waypoint)
+    if(waypoint_index == num_waypoint-1)
     {
 
-        xtask_d = point[waypoint_index-1].xdes;
-        ytask_d = point[waypoint_index-1].ydes;
-        ztask_d = point[waypoint_index-1].zdes;
+        xtask_d = point[waypoint_index].xdes;
+        ytask_d = point[waypoint_index].ydes;
+        ztask_d = point[waypoint_index].zdes;
         vxtask_d = 0;
         vytask_d = 0;
         vztask_d = 0;
+        lastpoint_flag = 2;
+        controllerdesired = point[waypoint_index].controllerdesired;
+
 
     }
 
@@ -741,10 +768,13 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     //friction coeff factor calculation : (FOR AVOIDING BOUNCING OF ROBOT)
     // Tried to Kp Kd of Z 0 and see the bouncing robot;  thus from that evalaute the friction factor (verify) : So that bouncing is not visible
 
-    *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
-    *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
-    *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
+    if(controllerdesired == 1)
+    {
 
+        *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
+        *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
+        *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector));
+    }
     //pks11
     // Adding feedforward element :
     // Kt is assumed to be 6
@@ -832,11 +862,18 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     // We take help of Rotation matrix to convert from world coordinate frame to normal coordinate frame
 
 
+    if(controllerdesired == 2)
+    {
+        Kpxn = 0;
+        Kpyn = 0;
+        Kpzn = 200;
 
-    //    *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
-    //    *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
-    //    *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
-
+        Kdxn = 0;
+        Kdyn = 0;
+        *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+        *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+        *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
+    }
 
     //pks11
     //torque saturation code:
@@ -929,7 +966,7 @@ void printing(void){
         //serial_printf(&SerialA, "%.2f %.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI);
         //  serial_printf(&SerialA, "%.2f %.2f,%.2f,%.2f   \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI,theta3); //printing theta3 in radians as well! pks11
         serial_printf(&SerialA, "theamotor : %.2f,%.2f,%.2f \n\r",printtheta1motor*180/PI,printtheta2motor*180/PI,printtheta3motor*180/PI); // pks11// this is motors angle measured
-        serial_printf(&SerialA, "position : %.2f,%.2f,%.2f \n\r",x_endeffector,y_endeffector,z_endeffector); //pks11 // position calculated from the forward Kinematics // D-H Table
+        serial_printf(&SerialA, "position : %.5f,%.5f,%.5f \n\r",x_endeffector,y_endeffector,z_endeffector); //pks11 // position calculated from the forward Kinematics // D-H Table
         serial_printf(&SerialA, "thetaDHcalc : %.2f, %.2f, %.2f \n\r",theta1_calc*180/PI,theta2_calc*180/PI,theta3_calc*180/PI); // pks11 // DH theta calculated from the geometric approach of the inverese kinematics
         serial_printf(&SerialA, "thetamotorcalc :%.2f,%.2f,%.2f \n\r",theta1_motor_calc*180/PI,theta2_motor_calc*180/PI,theta3_motor_calc*180/PI); // pks11/ Joint motors calculated from the calculted inverese kinemtaics of DH Theta
 
