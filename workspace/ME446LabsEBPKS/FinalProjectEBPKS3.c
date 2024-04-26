@@ -317,8 +317,17 @@ typedef struct{
 } waypoint;
 
 
-//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,2,1},{0.03254,0.34873,0.25254,3,1},{0.03013,0.35212,0.12072,4,2},{0.03013,0.35212,0.2455,5,2},{0.21149,0.1195,0.338,6.5,1},{0.38189,0.13049,0.28786,7.5,1},{0.39062,0.1228,0.209,9,1},{0.40735,0.10127,0.209,10.5,3},{0.41368,0.08619,0.209,13,3},{0.41451,0.07224,0.209,14,1},{0.40125,0.06105,0.209,15,1},{0.38721,0.06634,0.209,16,4},{0.36081,0.0722,0.209,17,4},{0.341,0.0749,0.209,18.5,4},{0.32409,0.0656,0.209,20,1},{0.3287,0.05087,0.209,21,1},{0.34217,0.03298,0.209,22,3},{0.3778,-0.01006,0.209,23,3},{0.3778,-0.01006,0.319,24,1},{0.24243,0.19306,0.319,25,1},{0.24243,0.19306,0.29423,26.5,1},{0.24243,0.19306,0.28223,27.5,5},{0.24243,0.19306,0.28223,29.5,5},{0.24243,0.19306,0.39423,30.5,1}};
-waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,1.5,1},{0.03254,0.34873,0.25254,2,1},{0.03013,0.35212,0.13072,2.2,2},{0.03013,0.35212,0.13072,2.7,2},{0.03013,0.35212,0.2455,3,2},{0.03013,0.35212,0.36,3.2,1},{0.22104,0.17271,0.3654,3.5,1},{0.39038,0.12639,0.211,3.8,1},{0.41368,0.08619,0.211,4.3,3},{0.41226,0.07374,0.211,4.5,1},{0.40582,0.06503,0.211,4.7,1},{0.3423,0.07322,0.211,4.9,4},{0.32454,0.0656,0.211,5.2,1},{0.3289,0.04675,0.211,5.3,1},{0.3778,-0.01006,0.209,5.6,3},{0.3778,-0.01006,0.319,5.8,1},{0.24243,0.19306,0.319,6.2,1},{0.24243,0.19306,0.33423,6.3,1},{0.24243,0.19306,0.28223,6.5,5},{0.24243,0.19306,0.28223,8.5,5},{0.24243,0.19306,0.39423,8.8,1},{0.148,0,0.43,9.2,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,2,1},{0.03254,0.34873,0.25254,3,1},{0.03013,0.35212,0.12072,4,2},{0.03013,0.35212,0.2455,5,2},{0.21149,0.1195,0.338,6.5,1},{0.38189,0.13049,0.28786,7.5,1},{0.39062,0.1228,0.209,9,1},{0.40735,0.10127,0.209,10.5,3},{0.41368,0.08619,0.209,13,3},{0.41451,0.07224,0.209,14,1},{0.40125,0.06105,0.209,15,1},{0.38721,0.06634,0.209,16,4},{0.36081,0.0722,0.209,17,4},{0.341,0.0749,0.209,18.5,4},{0.32409,0.0656,0.209,20,1},{0.3287,0.05087,0.209,21,1},{0.34217,0.03298,0.209,22,3},{0.3778,-0.01006,0.209,23,3},{0.3778,-0.01006,0.319,24,1},{0.24243,0.19306,0.319,25,1},{0.24243,0.19306,0.29423,26.5,1},{0.24243,0.19306,0.28223,27.5,5},{0.24243,0.19306,0.28223,29.5,5},{0.254,0,0.508,30.5,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,1.5,1},{0.03254,0.34873,0.25254,2,1},{0.03013,0.35212,0.13072,2.2,2},{0.03013,0.35212,0.13072,2.7,2},{0.03013,0.35212,0.2455,3,2},{0.03013,0.35212,0.36,3.2,1},{0.22104,0.17271,0.3654,3.5,1},{0.39038,0.12639,0.211,3.8,1},{0.41004,0.089,0.211,4.3,3},{0.41226,0.07374,0.211,4.5,1},{0.41429,0.07739,0.211,4.6,1},{0.40582,0.06503,0.211,4.7,1},{0.3423,0.07322,0.211,4.9,4},{0.32454,0.0656,0.211,5.2,1},{0.3289,0.04675,0.211,5.3,1},{0.3778,-0.01006,0.211,5.6,3},{0.3778,-0.01006,0.319,5.8,1},{0.24243,0.19306,0.319,6.2,1},{0.24243,0.19306,0.33423,6.3,1},{0.24243,0.19306,0.28223,6.5,5},{0.24243,0.19306,0.28223,8.5,5},{0.24243,0.19306,0.39423,8.8,1},{0.148,0,0.43,9.2,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,1.5,1},{0.03254,0.34873,0.25254,2,1},{0.03013,0.35212,0.13072,2.2,2},{0.03013,0.35212,0.13072,2.7,2},{0.03013,0.35212,0.2455,3,2},{0.03013,0.35212,0.36,3.2,1},{0.22104,0.17271,0.3654,3.5,1},{0.39038,0.12639,0.211,3.8,1},{0.41368,0.08619,0.211,4.3,3},{0.41226,0.07374,0.211,4.5,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,1.5,1},{0.03254,0.34873,0.25254,2,1},{0.03013,0.35212,0.13072,2.2,2},{0.03013,0.35212,0.13072,2.7,2},{0.03013,0.35212,0.2455,3,2},{0.03013,0.35212,0.36,3.2,1},{0.22104,0.17271,0.3654,3.5,1},{0.39038,0.12639,0.211,3.8,1},{0.41349,0.09354,0.211,4.3,3},{0.41226,0.07374,0.211,4.5,7},{0.41353,0.07729,0.211,4.6,7},{0.40582,0.06503,0.211,4.7,7},{0.3423,0.07322,0.211,4.9,4},{0.32454,0.0656,0.211,5.2,1},{0.3289,0.04675,0.211,5.3,1},{0.3778,-0.01006,0.211,5.6,3},{0.3778,-0.01006,0.319,5.8,1},{0.24243,0.19306,0.319,6.2,1},{0.24243,0.19306,0.33423,6.3,1},{0.24243,0.19306,0.28223,6.5,5},{0.24243,0.19306,0.28223,8.5,5},{0.24243,0.19306,0.39423,8.8,1},{0.148,0,0.43,9.2,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,1.5,1},{0.03254,0.34873,0.25254,2,1},{0.03013,0.35212,0.13072,2.2,2},{0.03013,0.35212,0.13072,2.7,2},{0.03013,0.35212,0.2455,3,2},{0.03013,0.35212,0.36,3.2,1},{0.22104,0.17271,0.3654,3.5,1},{0.39038,0.12639,0.311,3.8,1},{0.41004,0.0892,0.311,4.3,3}};
+
+
+// slow trajectory
+waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,2,1},{0.03254,0.34873,0.25254,3,1},{0.03708,0.35456,0.12072,4,2},{0.03708,0.35456,0.12072,4.65,2},{0.03708,0.35456,0.2055,5.15,2},{0.19532,0.16614,0.3633,6.5,1},{0.39038,0.12639,0.211,9,1},{0.40735,0.10127,0.211,10.5,3},{0.41368,0.08619,0.211,13,3},{0.41451,0.07224,0.211,14,1},{0.40125,0.06105,0.211,15,1},{0.38721,0.06634,0.211,16,4},{0.36081,0.0722,0.211,17,4},{0.341,0.0749,0.211,18.5,4},{0.32409,0.0656,0.211,20,1},{0.3287,0.05087,0.211,21,1},{0.34217,0.03298,0.211,21.75,3},{0.3778,-0.01006,0.211,22.5,3},{0.392,-0.01655,0.211,23,1},{0.3778,-0.01006,0.319,24,1},{0.24243,0.19306,0.319,25,1},{0.24243,0.19306,0.29423,26.5,1},{0.24243,0.19306,0.28223,27.5,5},{0.24243,0.19306,0.28223,29.5,5},{0.254,0,0.508,30.5,1}};
+//waypoint point[] = {{0.148,0,0.43,1,1},{0,0.34,0.35,2,1},{0.03254,0.34873,0.25254,3,1},{0.03708,0.35456,0.12072,4,2},{0.03708,0.35456,0.12072,4.5,2},{0.03708,0.35456,0.2255,5,2}};
+
 
 //pks11 waypoint specification
 int num_waypoint = 0; // total number of waypoint
@@ -330,6 +339,13 @@ float time_traj = 0; // time taken to reach i-1 waypoint to ith waypoint
 float time_local = 0; // local time for travelling from i-1 waypoint to i waypoint
 float temp = 0;
 float lastpoint_flag = 0;
+float vx_taskd_k_1 = 0;
+float vy_taskd_k_1 = 0;
+float vz_taskd_k_1 = 0;
+
+float vx_taskd_k_2 = 0;
+float vy_taskd_k_2 = 0;
+float vz_taskd_k_2 = 0;
 
 void mains_code(void);
 
@@ -338,6 +354,7 @@ void mains_code(void);
 //
 void main(void)
 {
+
     mains_code();
 }
 
@@ -372,6 +389,8 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     float Kdy_task = 60; // 6
     float Kdz_task = 60; //6
     thetaz_r = 0;
+
+
 
     //Motor torque limitation(Max: 5 Min: -5)
 
@@ -413,6 +432,7 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
         ztask_d = z_endeffector + time_local*(point[waypoint_index].zdes - z_endeffector)/time_traj;
 
         vxtask_d = (point[waypoint_index].xdes - x_endeffector)/time_traj;
+
         vytask_d = (point[waypoint_index].ydes - y_endeffector)/time_traj;
         vztask_d = (point[waypoint_index].zdes - z_endeffector)/time_traj;
         controllerdesired = 1;
@@ -457,6 +477,12 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
 
 
     }
+
+    //filtering the velocity //pks11
+    //vxtask_d = (vxtask_d + vx_taskd_k_1 + vx_taskd_k_2)/3.0;
+    //vytask_d = (vytask_d + vy_taskd_k_1 + vy_taskd_k_2)/3.0;
+    //vztask_d = (vztask_d + vz_taskd_k_1 + vz_taskd_k_2)/3.0;
+
 
 
 
@@ -888,11 +914,13 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     {
         Kpxn = 0;
         Kpyn = 0;
-        Kpzn = 200;
+        Kpzn = 800; //Lazy trajctory
+        //Kpzn = 200; //Fast trajectory
 
         Kdxn = 0;
         Kdyn = 0;
-        Kdzn = 50;
+        Kdzn = 100; //Lazy trajectory
+        //Kdzn = 50; //fast trajectory
         *tau1 = fric_coeff_1*u_fric_1 - (JT_11*Rwn_11 + JT_12*Rwn_21 + JT_13*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_11*Rwn_12 + JT_12*Rwn_22 + JT_13*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_11*Rwn_13 + JT_12*Rwn_23 + JT_13*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
         *tau2 = fric_coeff_2*u_fric_2 - (JT_21*Rwn_11 + JT_22*Rwn_21 + JT_23*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_21*Rwn_12 + JT_22*Rwn_22 + JT_23*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_21*Rwn_13 + JT_22*Rwn_23 + JT_23*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
         *tau3 = fric_coeff_3*u_fric_3 - (JT_31*Rwn_11 + JT_32*Rwn_21 + JT_33*Rwn_31)*(Kdxn*Rwn_11*(vx_endeffector - vxtask_d) + Kdxn*Rwn_21*(vy_endeffector - vytask_d) + Kdxn*Rwn_31*(vz_endeffector - vztask_d) + Kpxn*Rwn_11*(x_endeffector - xtask_d) + Kpxn*Rwn_21*(y_endeffector - ytask_d) + Kpxn*Rwn_31*(z_endeffector - ztask_d)) - (JT_31*Rwn_12 + JT_32*Rwn_22 + JT_33*Rwn_32)*(Kdyn*Rwn_12*(vx_endeffector - vxtask_d) + Kdyn*Rwn_22*(vy_endeffector - vytask_d) + Kdyn*Rwn_32*(vz_endeffector - vztask_d) + Kpyn*Rwn_12*(x_endeffector - xtask_d) + Kpyn*Rwn_22*(y_endeffector - ytask_d) + Kpyn*Rwn_32*(z_endeffector - ztask_d)) - (JT_31*Rwn_13 + JT_32*Rwn_23 + JT_33*Rwn_33)*(Kdzn*Rwn_13*(vx_endeffector - vxtask_d) + Kdzn*Rwn_23*(vy_endeffector - vytask_d) + Kdzn*Rwn_33*(vz_endeffector - vztask_d) + Kpzn*Rwn_13*(x_endeffector - xtask_d) + Kpzn*Rwn_23*(y_endeffector - ytask_d) + Kpzn*Rwn_33*(z_endeffector - ztask_d));
@@ -956,8 +984,8 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
 
     if(controllerdesired == 5)
     {
-//        Kpz_task = 40; //Kpz_task
-//        Kdz_task = 0;
+        //        Kpz_task = 40; //Kpz_task
+        //        Kdz_task = 0;
         Kpx_task = 800;
         Kpy_task = 800;
         Kpz_task = 800;
@@ -968,6 +996,58 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
         *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_13*Fzcmd/Kt;
         *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_23*Fzcmd/Kt;
         *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_33*Fzcmd/Kt;
+    }
+
+    if(controllerdesired == 7)
+    {
+        //        Kpz_task = 40; //Kpz_task
+        //        Kdz_task = 0;
+        Kpx_task = 400;
+        Kpy_task = 400;
+        Kpz_task = 800;
+        Kdx_task = 0.5;
+        Kdy_task = 0.5;
+        Kdz_task = 0.5;
+
+        *tau1 = fric_coeff_1*u_fric_1 +  JT_11*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_12*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_13*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_13*Fzcmd/Kt;
+        *tau2 = fric_coeff_2*u_fric_2 +  JT_21*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_22*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_23*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_23*Fzcmd/Kt;
+        *tau3 = fric_coeff_3*u_fric_3 +  JT_31*(Kpx_task*(xtask_d - x_endeffector) + Kdx_task*(vxtask_d - vx_endeffector)) + JT_32*(Kpy_task*(ytask_d - y_endeffector) + Kdy_task*(vytask_d - vy_endeffector)) + JT_33*(Kpz_task*(ztask_d - z_endeffector) + Kdz_task*(vztask_d - vz_endeffector)) + JT_33*Fzcmd/Kt;
+        if(*tau1 < -3)
+        {
+            *tau1 = -3;
+            Ik_theta1 = Ik_theta1_1;
+        }
+
+        if(*tau1 > 3)
+        {
+            *tau1 = 5;
+            Ik_theta1 = Ik_theta1_1;
+        }
+
+        if(*tau2 < -3)
+        {
+            *tau2 = -3;
+            Ik_theta2 = Ik_theta2_1;
+
+        }
+
+        if(*tau2 > 3)
+        {
+            *tau2 = 3;
+            Ik_theta2 = Ik_theta2_1;
+        }
+
+        if(*tau3 < -3)
+        {
+            *tau3 = -5;
+            Ik_theta3 = Ik_theta3_1;
+        }
+
+        if(*tau3 > 3)
+        {
+            *tau3 = 3;
+            Ik_theta3 = Ik_theta3_1;
+        }
     }
     //pks11
     //torque saturation code:
@@ -1050,6 +1130,13 @@ void lab(float theta1motor,float theta2motor,float theta3motor,float *tau1,float
     Ik_theta1_1 = Ik_theta1;
     Ik_theta2_1 = Ik_theta2;
     Ik_theta3_1 = Ik_theta3;
+    vx_taskd_k_2 = vx_taskd_k_1;
+    vx_taskd_k_1 = vxtask_d;
+    vy_taskd_k_2 = vy_taskd_k_1;
+    vy_taskd_k_1 = vytask_d;
+    vz_taskd_k_2 = vz_taskd_k_1;
+    vz_taskd_k_1 = vztask_d;
+
 
 
     mycount++;
